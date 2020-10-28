@@ -39,3 +39,10 @@ This project contains different samples to use Kafka via Java API.
 To be able to do "transactions" with Kafka the producer and consumer should use the right configuration to avoid read all messages or uncommited messages. Besides the consumer should notify the new offset after process messages, should be the latest message offset plus one. Why plus one? Because Kafka add internal message to manage the transaction and we need to avoid that offset.
 
 This option could be useful in some scenarios but should be used with care, everythin is manual so it's not easy manage all the cases (Similar to normal SQL transactions managed manually).
+
+## Serialization and deserialization of messages
+- All messages are serialized when it's produced by producers.
+- All messages are deserialized when it's consumed by consumers.
+- Key and value of messages are serialized and deserialized.
+- You should define the configuration params to define the right classes to do this operation.
+- By default kafka provide common classes to do this operation but we can use extensions to use more complex algorithms to serialize or deserialize messages. Some of these algorithms are: Avro, 
