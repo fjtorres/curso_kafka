@@ -1,8 +1,10 @@
-package com.curso.kafka.api;
+package com.curso.kafka.util;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +24,7 @@ import org.apache.kafka.clients.admin.NewTopic;
  */
 public class TopicCreator {
 
-	public static void createTopics(String bootstrapServers, String... topics) throws InterruptedException {
+	public static void createTopics(String bootstrapServers, String... topics) throws InterruptedException, ExecutionException {
 
 		if (bootstrapServers == null || bootstrapServers.trim().length() == 0) {
 			throw new IllegalArgumentException("bootstrapServers parameter is required.");
@@ -36,11 +38,17 @@ public class TopicCreator {
 		props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
 		final AdminClient client = AdminClient.create(props);
+		
+		final Set<String> existingsTopics = client.listTopics().names().get();
+		
+		final Collection<NewTopic> newTopics = Stream.of(topics)
+				.filter(Objects::nonNull)
+				.filter(t -> !existingsTopics.contains(t)) // Remove existing topics to avoid error in creation.
+				.map(t -> new NewTopic(t, 3, (short) 1))
+				.collect(Collectors.toList());
 
-		final Collection<NewTopic> newTopics = Stream.of(topics).filter(Objects::nonNull)
-				.map(t -> new NewTopic(t, 3, (short) 1)).collect(Collectors.toList());
-
-		client.createTopics(newTopics);
-		Thread.sleep(5000);
+		// Wait for all futures instead of sleep.
+		client.createTopics(newTopics).all().get();
+		//Thread.sleep(5000);
 	}
 }

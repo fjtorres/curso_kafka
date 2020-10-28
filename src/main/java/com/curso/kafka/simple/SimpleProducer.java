@@ -1,4 +1,4 @@
-package com.curso.kafka.api.simple;
+package com.curso.kafka.simple;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -8,8 +8,8 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import com.curso.kafka.api.Constants;
-import com.curso.kafka.api.TopicCreator;
+import com.curso.kafka.util.Constants;
+import com.curso.kafka.util.TopicCreator;
 
 public class SimpleProducer {
 

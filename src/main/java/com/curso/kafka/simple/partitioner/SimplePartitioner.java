@@ -1,4 +1,4 @@
-package com.curso.kafka.api.simple.partitioner;
+package com.curso.kafka.simple.partitioner;
 
 import java.util.Map;
 

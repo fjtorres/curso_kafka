@@ -1,4 +1,4 @@
-package com.curso.kafka.api;
+package com.curso.kafka.util;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;

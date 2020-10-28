@@ -1,15 +1,13 @@
-package com.curso.kafka.api.simple;
+package com.curso.kafka.simple;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
-import com.curso.kafka.api.Constants;
+import com.curso.kafka.util.Constants;
 
 /**
  * Con este consumer con autocommit manual se da el caso de que si paramos la
@@ -19,19 +17,9 @@ import com.curso.kafka.api.Constants;
  * @author fjtorres
  *
  */
-public class ManualConsumer {
-
-	private static final AtomicBoolean closed = new AtomicBoolean(false);// para cerrar al matar el proceso
+public class ManualConsumer extends AbstractConsumer {
 
 	public static void main(String[] args) throws InterruptedException {
-
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				System.out.println("Shutting down");
-				closed.set(true);
-			}
-		});
 
 		final Properties props = new Properties();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Constants.KAFKA_HOST);
@@ -41,21 +29,17 @@ public class ManualConsumer {
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, Constants.DEFAULT_DESERIALIZER.getName());
 
 		final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
+		Runtime.getRuntime().addShutdownHook(new Thread(consumer::close));
+
 		consumer.subscribe(Collections.singletonList(SimpleProducer.TOPIC));
 
 		final Duration interval = Duration.ofMillis(100);
 
-		while (!closed.get()) {
+		while (true) {
 			consumer.poll(interval).forEach(ManualConsumer::logRecord);
 			Thread.sleep(5000);
 			consumer.commitSync();
 		}
-
-		consumer.close();
-	}
-
-	private static void logRecord(ConsumerRecord<String, String> record) {
-		System.out.printf("partition = %2d offset = %5d key = %7s timestamp = %8s value = %12s\n", record.partition(),
-				record.offset(), record.key(), String.valueOf(record.timestamp()), record.value());
 	}
 }
